@@ -35,6 +35,32 @@
             </div>
         </section>
 
+        <section class="space-y-6">
+            <h2 class="text-sm font-semibold text-zinc-300 uppercase tracking-wide">Google Fonts (public menu)</h2>
+            <p class="text-xs text-zinc-600 -mt-2">Pick a font from the list for each language. We load weights 400–700 from Google Fonts and keep <strong class="text-zinc-400">Outfit</strong> and <strong class="text-zinc-400">Noto Sans Arabic</strong> as fallbacks. Add more names in <code class="text-zinc-500">config/google_fonts.php</code> if needed.</p>
+
+            @foreach ([
+                'en' => ['label' => 'English (EN)'],
+                'ar' => ['label' => 'Arabic (AR)'],
+                'ku' => ['label' => 'Kurdish (KU)'],
+            ] as $code => $meta)
+                @php $famKey = 'font_'.$code.'_family'; @endphp
+                <div class="rounded-lg border border-zinc-800 bg-zinc-900/30 p-4 space-y-2">
+                    <h3 class="text-xs font-semibold text-zinc-400 uppercase tracking-wide">{{ $meta['label'] }}</h3>
+                    @error('font_'.$code.'_family')
+                        <p class="text-xs text-red-400">{{ $message }}</p>
+                    @enderror
+                    <label class="block text-xs font-medium text-zinc-400 mb-1">Font</label>
+                    <select name="font_{{ $code }}_family" class="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/40">
+                        <option value="">Default (Outfit + Noto Sans Arabic)</option>
+                        @foreach ($googleFontFamilies as $familyName)
+                            <option value="{{ $familyName }}" @selected(old('font_'.$code.'_family', $settings->{$famKey}) === $familyName)>{{ $familyName }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            @endforeach
+        </section>
+
         <section class="space-y-4">
             <h2 class="text-sm font-semibold text-zinc-300 uppercase tracking-wide">Branding</h2>
             <div>
@@ -150,6 +176,7 @@
                 'social_instagram_url' => 'Instagram',
                 'social_twitter_url' => 'X (Twitter)',
                 'social_tiktok_url' => 'TikTok',
+                'social_snapchat_url' => 'Snapchat',
                 'social_youtube_url' => 'YouTube',
             ] as $field => $label)
                 <div>

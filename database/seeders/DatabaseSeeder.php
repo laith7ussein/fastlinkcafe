@@ -155,6 +155,7 @@ class DatabaseSeeder extends Seeder
             'social_twitter_url' => null,
             'social_tiktok_url' => null,
             'social_youtube_url' => null,
+            'social_snapchat_url' => null,
         ]);
     }
 

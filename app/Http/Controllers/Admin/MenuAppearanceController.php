@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\MenuSetting;
+use App\Support\GoogleFontsCatalog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class MenuAppearanceController extends Controller
@@ -15,12 +17,15 @@ class MenuAppearanceController extends Controller
     public function edit(): View
     {
         $settings = MenuSetting::instance();
+        $googleFontFamilies = GoogleFontsCatalog::families();
 
-        return view('admin.menu_appearance.edit', compact('settings'));
+        return view('admin.menu_appearance.edit', compact('settings', 'googleFontFamilies'));
     }
 
     public function update(Request $request): RedirectResponse
     {
+        $allowedFonts = GoogleFontsCatalog::families();
+
         $request->validate([
             'brand_accent_color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'currency_code' => ['required', 'string', 'max:12', 'regex:/^[A-Za-z]+$/'],
@@ -43,6 +48,10 @@ class MenuAppearanceController extends Controller
             'social_twitter_url' => ['nullable', 'url', 'max:2048'],
             'social_tiktok_url' => ['nullable', 'url', 'max:2048'],
             'social_youtube_url' => ['nullable', 'url', 'max:2048'],
+            'social_snapchat_url' => ['nullable', 'url', 'max:2048'],
+            'font_en_family' => ['nullable', 'string', Rule::in($allowedFonts)],
+            'font_ar_family' => ['nullable', 'string', Rule::in($allowedFonts)],
+            'font_ku_family' => ['nullable', 'string', Rule::in($allowedFonts)],
         ]);
 
         $priceShowCents = $request->boolean('price_show_cents');
@@ -77,11 +86,15 @@ class MenuAppearanceController extends Controller
             'lang_en_enabled' => $langEn,
             'lang_ar_enabled' => $langAr,
             'lang_ku_enabled' => $langKu,
+            'font_en_family' => $this->blankToNull($request->input('font_en_family')),
+            'font_ar_family' => $this->blankToNull($request->input('font_ar_family')),
+            'font_ku_family' => $this->blankToNull($request->input('font_ku_family')),
             'social_facebook_url' => $this->blankToNull($request->input('social_facebook_url')),
             'social_instagram_url' => $this->blankToNull($request->input('social_instagram_url')),
             'social_twitter_url' => $this->blankToNull($request->input('social_twitter_url')),
             'social_tiktok_url' => $this->blankToNull($request->input('social_tiktok_url')),
             'social_youtube_url' => $this->blankToNull($request->input('social_youtube_url')),
+            'social_snapchat_url' => $this->blankToNull($request->input('social_snapchat_url')),
         ]);
 
         return redirect()->route('admin.menu-appearance.edit')->with('status', 'Site & menu settings saved.');

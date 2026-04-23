@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\GoogleFontsCatalog;
 use App\Support\MenuLocale;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,11 +24,15 @@ class MenuSetting extends Model
         'lang_en_enabled',
         'lang_ar_enabled',
         'lang_ku_enabled',
+        'font_en_family',
+        'font_ar_family',
+        'font_ku_family',
         'social_facebook_url',
         'social_instagram_url',
         'social_twitter_url',
         'social_tiktok_url',
         'social_youtube_url',
+        'social_snapchat_url',
     ];
 
     protected function casts(): array
@@ -64,11 +69,15 @@ class MenuSetting extends Model
             'lang_en_enabled' => true,
             'lang_ar_enabled' => true,
             'lang_ku_enabled' => true,
+            'font_en_family' => null,
+            'font_ar_family' => null,
+            'font_ku_family' => null,
             'social_facebook_url' => null,
             'social_instagram_url' => null,
             'social_twitter_url' => null,
             'social_tiktok_url' => null,
             'social_youtube_url' => null,
+            'social_snapchat_url' => null,
         ]);
     }
 
@@ -195,5 +204,23 @@ class MenuSetting extends Model
             'currency' => $this->currencyCode(),
             'showCents' => (bool) $this->price_show_cents,
         ];
+    }
+
+    public function googleFontsStylesheetHref(): string
+    {
+        return GoogleFontsCatalog::stylesheetHrefForSettings($this);
+    }
+
+    /** Google Font family for this menu locale, or null to use default stack only. */
+    public function primaryFontFamilyForMenuLocale(string $locale): ?string
+    {
+        $locale = MenuLocale::normalize($locale);
+        $v = $this->getAttribute('font_'.$locale.'_family');
+        if (! is_string($v) || trim($v) === '') {
+            return null;
+        }
+        $v = trim($v);
+
+        return GoogleFontsCatalog::isValid($v) ? $v : null;
     }
 }
