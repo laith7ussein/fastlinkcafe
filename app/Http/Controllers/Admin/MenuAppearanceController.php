@@ -23,6 +23,8 @@ class MenuAppearanceController extends Controller
     {
         $request->validate([
             'brand_accent_color' => ['required', 'string', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'currency_code' => ['required', 'string', 'max:12', 'regex:/^[A-Za-z]+$/'],
+            'price_show_cents' => ['nullable', 'boolean'],
             'site_name_en' => ['nullable', 'string', 'max:160'],
             'site_name_ar' => ['nullable', 'string', 'max:160'],
             'site_name_ku' => ['nullable', 'string', 'max:160'],
@@ -43,6 +45,8 @@ class MenuAppearanceController extends Controller
             'social_youtube_url' => ['nullable', 'url', 'max:2048'],
         ]);
 
+        $priceShowCents = $request->boolean('price_show_cents');
+
         $langEn = $request->boolean('lang_en_enabled');
         $langAr = $request->boolean('lang_ar_enabled');
         $langKu = $request->boolean('lang_ku_enabled');
@@ -61,6 +65,8 @@ class MenuAppearanceController extends Controller
             'cover_image_url' => $coverUrl,
             'logo_url' => $logoUrl,
             'brand_accent_color' => $request->input('brand_accent_color'),
+            'currency_code' => strtoupper($request->input('currency_code')),
+            'price_show_cents' => $priceShowCents,
             'site_name_en' => $this->blankToNull($request->input('site_name_en')),
             'site_name_ar' => $this->blankToNull($request->input('site_name_ar')),
             'site_name_ku' => $this->blankToNull($request->input('site_name_ku')),

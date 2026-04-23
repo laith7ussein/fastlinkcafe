@@ -736,7 +736,7 @@
                                 <div class="ph"><img src="{{ $item->image_url }}" alt="" loading="lazy" decoding="async"></div>
                                 <div class="meta">
                                     <div class="name">{{ $item->nameFor($lang) }}</div>
-                                    <div class="price">{{ number_format((float) $item->price, 2) }}</div>
+                                    <div class="price">{{ $settings->formatPriceWithCurrency($item->price) }}</div>
                                 </div>
                             </button>
                         @endforeach
@@ -784,6 +784,17 @@
     <script>
     (function () {
         var MENU_LANGS = @json($enabled);
+        var PRICE_FMT = @json($settings->priceFormatForJs());
+        function formatMoney(amount) {
+            var n = Number(amount);
+            if (!Number.isFinite(n)) n = 0;
+            var dec = PRICE_FMT.showCents ? 2 : 0;
+            var fixed = n.toFixed(dec);
+            var parts = fixed.split('.');
+            var intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            var num = PRICE_FMT.showCents && parts[1] !== undefined ? intPart + '.' + parts[1] : intPart;
+            return num + ' ' + PRICE_FMT.currency;
+        }
         try {
             var _p = new URLSearchParams(window.location.search);
             var _q = _p.get('lang');
@@ -836,9 +847,9 @@
                     <img src="${escapeAttr(l.image_url)}" alt="">
                     <div class="grow">
                         <div class="nm">${escapeHtml(l.name)}</div>
-                        <div class="pq">${l.qty} × ${Number(l.price).toFixed(2)}</div>
+                        <div class="pq">${l.qty} × ${formatMoney(l.price)}</div>
                     </div>
-                    <div style="font-weight:700;color:var(--accent)">${(l.qty * Number(l.price)).toFixed(2)}</div>
+                    <div style="font-weight:700;color:var(--accent)">${formatMoney(l.qty * Number(l.price))}</div>
                     <button type="button" class="basket-remove" data-basket-remove="${i}" title="Remove" aria-label="Remove from basket">×</button>
                 </div>
             `).join('');
@@ -865,7 +876,7 @@
             sheetImg.alt = item.name;
             sheetTitle.textContent = item.name;
             sheetDesc.textContent = item.description || 'No description.';
-            sheetPrice.textContent = Number(item.price).toFixed(2);
+            sheetPrice.textContent = formatMoney(item.price);
             backdrop.classList.add('open');
             sheet.classList.add('open');
             document.body.style.overflow = 'hidden';

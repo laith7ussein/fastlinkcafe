@@ -44,6 +44,17 @@
                 <p class="text-xs text-zinc-600 mt-1">Used for prices, highlights, and buttons on the public menu (hex #RRGGBB).</p>
             </div>
             <div>
+                <label class="block text-xs font-medium text-zinc-400 mb-1">Currency code</label>
+                <input name="currency_code" value="{{ old('currency_code', $settings->currencyCode()) }}" maxlength="12" placeholder="IQD" pattern="[A-Za-z]+" required dir="ltr"
+                    class="w-full max-w-xs rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm uppercase focus:ring-2 focus:ring-amber-500/40">
+                <p class="text-xs text-zinc-600 mt-1">ISO-style code shown after prices on the public menu (default IQD).</p>
+            </div>
+            <label class="flex items-start gap-2 text-sm text-zinc-300">
+                <input type="checkbox" name="price_show_cents" value="1" class="mt-0.5 rounded border-zinc-600 bg-zinc-950 text-amber-500"
+                    @checked(old('price_show_cents', $settings->price_show_cents))>
+                <span>Show cents in prices (e.g. <span class="text-zinc-400">10.00</span>); turn off for whole units (e.g. <span class="text-zinc-400">10</span>).</span>
+            </label>
+            <div>
                 <label class="block text-xs font-medium text-zinc-400 mb-1">Site name — English</label>
                 <input name="site_name_en" value="{{ old('site_name_en', $settings->site_name_en) }}" maxlength="160" placeholder="{{ config('app.name') }}"
                     class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/40">

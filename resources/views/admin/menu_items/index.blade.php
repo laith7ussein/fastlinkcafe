@@ -26,7 +26,7 @@
                             <span class="block text-xs text-zinc-600">#{{ $item->sort_order }}</span>
                         </td>
                         <td class="px-4 py-3 text-zinc-400">{{ $item->category->nameForAdmin() }}</td>
-                        <td class="px-4 py-3 text-amber-400/90">{{ number_format((float) $item->price, 2) }}</td>
+                        <td class="px-4 py-3 text-amber-400/90">{{ $settings->formatPriceWithCurrency($item->price) }}</td>
                         <td class="px-4 py-3">
                             @if ($item->is_active)
                                 <span class="text-emerald-400/90">Yes</span>

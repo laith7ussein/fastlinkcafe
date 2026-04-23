@@ -10,6 +10,8 @@ class MenuSetting extends Model
     protected $fillable = [
         'cover_image_url',
         'brand_accent_color',
+        'currency_code',
+        'price_show_cents',
         'site_name_en',
         'site_name_ar',
         'site_name_ku',
@@ -34,6 +36,7 @@ class MenuSetting extends Model
             'lang_en_enabled' => 'boolean',
             'lang_ar_enabled' => 'boolean',
             'lang_ku_enabled' => 'boolean',
+            'price_show_cents' => 'boolean',
         ];
     }
 
@@ -48,6 +51,8 @@ class MenuSetting extends Model
         return static::query()->create([
             'cover_image_url' => null,
             'brand_accent_color' => '#d4a853',
+            'currency_code' => 'IQD',
+            'price_show_cents' => true,
             'site_name_en' => null,
             'site_name_ar' => null,
             'site_name_ku' => null,
@@ -153,5 +158,42 @@ class MenuSetting extends Model
         $c = $this->brand_accent_color ?? '#d4a853';
 
         return is_string($c) && preg_match('/^#[0-9A-Fa-f]{6}$/', $c) ? $c : '#d4a853';
+    }
+
+    public function currencyCode(): string
+    {
+        $c = $this->currency_code ?? 'IQD';
+        if (! is_string($c)) {
+            return 'IQD';
+        }
+        $c = strtoupper(preg_replace('/[^A-Za-z]/', '', trim($c)));
+
+        return $c !== '' ? substr($c, 0, 12) : 'IQD';
+    }
+
+    /** Formatted numeric amount only (no currency code). */
+    public function formatPriceAmount(float|string|null $amount): string
+    {
+        $n = (float) ($amount ?? 0);
+        $decimals = $this->price_show_cents ? 2 : 0;
+
+        return number_format($n, $decimals, '.', ',');
+    }
+
+    /** Display string for menus, e.g. "1,250.00 IQD" or "1,250 IQD". */
+    public function formatPriceWithCurrency(float|string|null $amount): string
+    {
+        return $this->formatPriceAmount($amount).' '.$this->currencyCode();
+    }
+
+    /**
+     * @return array{currency: string, showCents: bool}
+     */
+    public function priceFormatForJs(): array
+    {
+        return [
+            'currency' => $this->currencyCode(),
+            'showCents' => (bool) $this->price_show_cents,
+        ];
     }
 }

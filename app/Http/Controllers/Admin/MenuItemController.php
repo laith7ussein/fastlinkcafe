@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\MenuItem;
+use App\Models\MenuSetting;
 use App\Services\MenuItemImageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,7 +24,9 @@ class MenuItemController extends Controller
             ->orderBy('name_en')
             ->get();
 
-        return view('admin.menu_items.index', compact('items'));
+        $settings = MenuSetting::instance();
+
+        return view('admin.menu_items.index', compact('items', 'settings'));
     }
 
     public function create(): View

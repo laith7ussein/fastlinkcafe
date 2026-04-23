@@ -137,6 +137,8 @@ class DatabaseSeeder extends Seeder
         MenuSetting::query()->create([
             'cover_image_url' => $coverImg('flm-menu-hero-cover'),
             'brand_accent_color' => '#d4a853',
+            'currency_code' => 'IQD',
+            'price_show_cents' => true,
             'site_name_en' => 'Fastlink Café',
             'site_name_ar' => 'مقهى فاستلينك',
             'site_name_ku' => 'فاستلینک کافێ',
