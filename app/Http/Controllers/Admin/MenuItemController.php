@@ -82,7 +82,49 @@ class MenuItemController extends Controller
 
         $data['is_active'] = $request->boolean('is_active');
 
+        // #region agent log
+        if (isset($data['image_url']) && is_string($data['image_url'])) {
+            $iu = $data['image_url'];
+            $payload = json_encode([
+                'sessionId' => 'ec7f84',
+                'hypothesisId' => 'H3',
+                'location' => 'MenuItemController::update:before_save',
+                'message' => 'image_url about to persist',
+                'data' => [
+                    'urlLen' => strlen($iu),
+                    'urlTail' => strlen($iu) > 80 ? substr($iu, -80) : $iu,
+                    'hasUpload' => $request->hasFile('image'),
+                ],
+                'timestamp' => (int) (microtime(true) * 1000),
+            ], JSON_UNESCAPED_SLASHES);
+            if (is_string($payload)) {
+                @file_put_contents(base_path('.cursor/debug-ec7f84.log'), $payload."\n", FILE_APPEND | LOCK_EX);
+            }
+        }
+        // #endregion
+
         $menu_item->update($data);
+
+        // #region agent log
+        $menu_item->refresh();
+        $dbUrl = $menu_item->image_url;
+        if (is_string($dbUrl)) {
+            $payload2 = json_encode([
+                'sessionId' => 'ec7f84',
+                'hypothesisId' => 'H3',
+                'location' => 'MenuItemController::update:after_save',
+                'message' => 'image_url from DB after refresh',
+                'data' => [
+                    'urlLen' => strlen($dbUrl),
+                    'urlTail' => strlen($dbUrl) > 80 ? substr($dbUrl, -80) : $dbUrl,
+                ],
+                'timestamp' => (int) (microtime(true) * 1000),
+            ], JSON_UNESCAPED_SLASHES);
+            if (is_string($payload2)) {
+                @file_put_contents(base_path('.cursor/debug-ec7f84.log'), $payload2."\n", FILE_APPEND | LOCK_EX);
+            }
+        }
+        // #endregion
 
         return redirect()->route('admin.menu-items.index')->with('status', 'Item updated.');
     }
@@ -109,11 +151,37 @@ class MenuItemController extends Controller
             'description_ar' => ['nullable', 'string', 'max:5000'],
             'description_ku' => ['nullable', 'string', 'max:5000'],
             'price' => ['required', 'numeric', 'min:0', 'max:999999.99'],
-            'image_url' => ['nullable', 'url', 'max:2048'],
+            'image_url' => ['nullable', 'string', 'max:2048', $this->imageUrlValidator()],
             'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,gif,webp', 'max:5120'],
             'sort_order' => ['required', 'integer', 'min:0', 'max:99999'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
+    }
+
+    /**
+     * Allow absolute URLs (external/CDN) or same-origin stored paths from uploads.
+     *
+     * @return \Closure(string, mixed, \Closure(string): void): void
+     */
+    private function imageUrlValidator(): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail): void {
+            if (! is_string($value) || $value === '') {
+                return;
+            }
+            if (str_contains($value, '..')) {
+                $fail('Invalid image path.');
+
+                return;
+            }
+            if (str_starts_with($value, '/storage/')) {
+                return;
+            }
+            if (filter_var($value, FILTER_VALIDATE_URL) !== false) {
+                return;
+            }
+            $fail('Provide a valid image URL or a path starting with /storage/.');
+        };
     }
 
     private function deleteStoredMenuImage(?string $url): void

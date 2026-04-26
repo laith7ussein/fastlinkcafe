@@ -57,7 +57,7 @@
     @endif
     <div>
         <label class="block text-xs text-zinc-500 mb-1">Image URL</label>
-        <input name="image_url" type="url" value="{{ old('image_url', $i?->image_url) }}" maxlength="2048" placeholder="https://…" dir="ltr"
+        <input name="image_url" type="text" value="{{ old('image_url', $i?->image_url) }}" maxlength="2048" placeholder="https://… or /storage/…" dir="ltr"
             class="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500/40">
     </div>
     <div>
